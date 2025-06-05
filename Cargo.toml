@@ -1,0 +1,19 @@
+[package]
+name = "tb-rust-checker"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.98"
+clap = { version = "4.5.39", features = ["derive"] }
+futures = "0.3.31"
+hex = "0.4.3"
+itertools = "0.14.0"
+reqwest = { version = "0.12.19", features = ["json"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+sha2 = "0.10.9"
+thiserror = "2.0.12"
+tokio = { version = "1.45.1", features = ["macros", "rt", "signal"] }
+toml = "0.8.22"
+url = "2.5.4"
