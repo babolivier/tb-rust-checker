@@ -17,6 +17,8 @@ use super::MessageType;
 mod filter;
 mod response;
 
+const SYNC_TIMEOUT: usize = 30000;
+
 async fn do_sync(cfg: Config, client: Client, url: Url) -> Result<String, Error> {
     let response: SyncResponse = client
         .get(url)
@@ -88,8 +90,8 @@ pub(crate) async fn sync(cfg: Config, token: String) -> Result<(), Error> {
     let client = Client::new();
 
     let base_url = format!(
-        "https://{}/_matrix/client/v3/sync?filter={}&timeout=30000",
-        cfg.matrix.server_host, filter
+        "https://{}/_matrix/client/v3/sync?filter={}&timeout={}",
+        cfg.matrix.server_host, filter, SYNC_TIMEOUT,
     );
     let base_url = Url::parse(&base_url)?;
     let token = RefCell::new(token);
