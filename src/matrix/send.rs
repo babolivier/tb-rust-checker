@@ -1,21 +1,25 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use anyhow::Error;
 use reqwest::Client;
 use url::Url;
 
-use crate::{
-    config::MatrixConfig,
-    matrix::{MessageEventContent, MessageType},
-};
+use crate::config::MatrixConfig;
+use crate::error::Error;
+use crate::matrix::{MessageEventContent, MessageType};
 
-pub(crate) async fn send_notice(
-    matrix_cfg: MatrixConfig,
+/// Send an `m.room.message` event to the target room specified in the
+/// configuration.
+///
+/// The message's content has `m.notice` as its message type and the provided
+/// text as the body.
+pub(super) async fn send_notice(
+    matrix_cfg: &MatrixConfig,
     client: Client,
-    message: String,
+    message: &str,
 ) -> Result<(), Error> {
+    // Build and string-ified the event content.
     let content = MessageEventContent {
-        body: Some(message),
+        body: Some(message.to_owned()),
         msgtype: Some(MessageType::Notice),
     };
     let content = serde_json::to_string(&content)?;
@@ -34,9 +38,11 @@ pub(crate) async fn send_notice(
     );
     let url = Url::parse(&url)?;
 
+    // Send the request, with HTTP errors propagated as Rust errors since no
+    // non-2XX response is expected here.
     client
         .put(url)
-        .bearer_auth(matrix_cfg.access_token)
+        .bearer_auth(matrix_cfg.access_token.clone())
         .body(content)
         .send()
         .await?

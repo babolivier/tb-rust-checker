@@ -1,0 +1,29 @@
+# The directory to use to persist information.
+#
+# This setting is optional, and defaults to the current working directory.
+store_location = "/foo/bar"
+
+# A substring of the message to react to. A message will be sent to any notice
+# message containing this string.
+push_message_substring = "mozilla-central push notification"
+
+[messages]
+# Message to send when the comm-central Rust dependencies need to be revendored.
+deps_out_of_date = "The Rust dependencies need to be revendored! Look out for a patch"
+
+# Message to send when the vendored comm-central Rust dependencies are
+# up-to-date with mozilla-central.
+deps_up_to_date = "No revendor of the Rust dependencies needed"
+
+[matrix]
+# The domain on which the Matrix server is accessed. The server must be
+# accessible on this domain using HTTPS with a valid certificate. If a port
+# other than 443 is used, it can be specified here (e.g. `example.com:8448`).
+server_host = "mozilla.modular.im"
+
+# An access token for the Matrix account the bot will be using to read and send
+# messages.
+access_token = "syt_SOME_TOKEN"
+
+# The ID of the room to watch for new messages.
+room_id = "!zcJFTJegIUwIjDHLAe:example.com"

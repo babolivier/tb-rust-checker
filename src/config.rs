@@ -3,10 +3,12 @@ use std::fs;
 use anyhow::Error;
 use serde::Deserialize;
 
+/// The user-defined config for the Matrix bot.
+///
+/// See the configuration sample file for documentation of each field.
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct Config {
-    // TODO: Optional?
-    pub storage_location: String,
+    pub store_location: Option<String>,
     pub push_message_substring: String,
     pub messages: MessagesConfig,
     pub matrix: MatrixConfig,
@@ -25,6 +27,7 @@ pub(crate) struct MatrixConfig {
     pub room_id: String,
 }
 
+/// Read and parse the configuration file at the given path.
 pub(crate) fn load_config_from_file(path: String) -> Result<Config, Error> {
     let file_content = fs::read_to_string(path)?;
     let config: Config = toml::from_str(&file_content)?;

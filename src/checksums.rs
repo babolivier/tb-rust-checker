@@ -1,6 +1,7 @@
-use anyhow::Error;
 use serde::Deserialize;
 use sha2::{Digest, Sha512};
+
+use crate::error::Error;
 
 #[derive(Debug, Clone, Deserialize)]
 struct CommCentralChecksums {
@@ -10,49 +11,69 @@ struct CommCentralChecksums {
     mc_cargo_lock: String,
 }
 
-const CC_CHECKSUMS_URL: &'static str =
+/// The file on comm-central containing the checksums to compare.
+const CC_CHECKSUMS_URL: &str =
     "https://hg-edge.mozilla.org/comm-central/raw-file/tip/rust/checksums.json";
 
-const MC_WORKSPACE_TOML_URL: &'static str =
+/// The files on mozilla-central to compare the checksums of.
+const MC_WORKSPACE_TOML_URL: &str =
     "https://hg-edge.mozilla.org/mozilla-central/raw-file/tip/Cargo.toml";
-const MC_GKRUST_TOML_URL: &'static str = "https://hg-edge.mozilla.org/mozilla-central/raw-file/tip/toolkit/library/rust/shared/Cargo.toml";
-const MC_HACK_TOML_URL: &'static str =
+const MC_GKRUST_TOML_URL: &str = "https://hg-edge.mozilla.org/mozilla-central/raw-file/tip/toolkit/library/rust/shared/Cargo.toml";
+const MC_HACK_TOML_URL: &str =
     "https://hg-edge.mozilla.org/mozilla-central/raw-file/tip/build/workspace-hack/Cargo.toml";
-const MC_CARGO_LOCK_URL: &'static str =
+const MC_CARGO_LOCK_URL: &str =
     "https://hg-edge.mozilla.org/mozilla-central/raw-file/tip/Cargo.lock";
 
-pub(crate) async fn compare_checksums() -> Result<bool, Error> {
+/// Download the comm-central file containing the SHA512 checksums to compare,
+/// then check if they match the checksums of the relevant mozilla-central
+/// files.
+///
+/// This function returns whether the checksum of all files match the checksums
+/// stored in comm-central.
+pub(crate) async fn verify_checksums_match() -> Result<bool, Error> {
+    // Download the checksums file from comm-central.
     let checksums: CommCentralChecksums = reqwest::get(CC_CHECKSUMS_URL).await?.json().await?;
 
+    // Download all the relevant files, then compare their checksums to the ones
+    // we expect.
     let futs = vec![
-        compare_checksum_for_file(&checksums.mc_workspace_toml, MC_WORKSPACE_TOML_URL),
-        compare_checksum_for_file(&checksums.mc_gkrust_toml, MC_GKRUST_TOML_URL),
-        compare_checksum_for_file(&checksums.mc_hack_toml, MC_HACK_TOML_URL),
-        compare_checksum_for_file(&checksums.mc_cargo_lock, MC_CARGO_LOCK_URL),
+        compare_checksum_for_file(MC_WORKSPACE_TOML_URL, &checksums.mc_workspace_toml),
+        compare_checksum_for_file(MC_GKRUST_TOML_URL, &checksums.mc_gkrust_toml),
+        compare_checksum_for_file(MC_HACK_TOML_URL, &checksums.mc_hack_toml),
+        compare_checksum_for_file(MC_CARGO_LOCK_URL, &checksums.mc_cargo_lock),
     ];
 
-    let checksums_match = match futures::future::join_all(futs)
+    let mismatch = futures::future::join_all(futs)
         .await
         .into_iter()
         .filter_map(|result| match result {
-            Ok(checksum_matches) if checksum_matches => Some(checksum_matches),
+            // Record any mismatch in the checksums.
+            Ok(checksum_matches) if !checksum_matches => Some(checksum_matches),
             Ok(_) => None,
             Err(err) => {
-                eprintln!("error querying files: {err}");
+                log::error!("Error querying files to compare: {err}");
                 None
             }
         })
         .next()
-    {
-        Some(_) => true,
-        None => false,
-    };
+        .is_some();
 
-    Ok(checksums_match)
+    Ok(!mismatch)
 }
 
-async fn compare_checksum_for_file(expected_checksum: &str, url: &str) -> Result<bool, Error> {
+/// Download the file at the given URL, then compare its SHA512 checksum to the
+/// one that is expected as per the comm-central checksums file.
+async fn compare_checksum_for_file(url: &str, expected_checksum: &str) -> Result<bool, Error> {
     let bytes = reqwest::get(url).await?.bytes().await?;
     let checksum = Sha512::digest(bytes);
-    Ok(expected_checksum == hex::encode(checksum))
+    let checksum = hex::encode(checksum);
+
+    log::debug!(
+        "Comparing checksums for {}: {} == {}",
+        url,
+        expected_checksum,
+        checksum
+    );
+
+    Ok(expected_checksum == checksum)
 }

@@ -5,8 +5,9 @@ pub(crate) use sync::sync;
 mod send;
 mod sync;
 
+/// The `msgtype` property of an `m.room.message` Matrix event content.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(self) enum MessageType {
+enum MessageType {
     #[serde(rename = "m.text")]
     Text,
     #[serde(rename = "m.notice")]
@@ -23,8 +24,9 @@ pub(self) enum MessageType {
     Video,
 }
 
+/// The content of an `m.room.message` Matrix event.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(self) struct MessageEventContent {
+struct MessageEventContent {
     pub body: Option<String>,
     pub msgtype: Option<MessageType>,
 }
