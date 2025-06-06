@@ -74,6 +74,11 @@ run the bot.
 cargo run -- -c config.toml
 ```
 
+The `RUST_LOG` environment variable can be used to control logging. See the
+documentation for the
+[env_logger](https://docs.rs/env_logger/latest/env_logger/#enabling-logging)
+crate.
+
 ## Misc
 
 ### Does the bot also provide patches for comm-central?
