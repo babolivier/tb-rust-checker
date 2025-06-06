@@ -8,8 +8,7 @@ use crate::matrix::MessageEventContent;
 ///
 /// This and all nested structs only include properties relevant to us.
 ///
-/// See
-/// <https://spec.matrix.org/v1.14/client-server-api/#get_matrixclientv3sync>
+/// See <https://spec.matrix.org/v1.14/client-server-api/#get_matrixclientv3sync>
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct SyncResponse {
     pub rooms: Option<Rooms>,

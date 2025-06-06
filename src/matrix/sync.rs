@@ -93,6 +93,8 @@ async fn do_sync(cfg: &Config, client: Client, url: Url) -> Result<String, Error
             log::debug!("Checksums do not match");
             send_notice(&cfg.matrix, client.clone(), &cfg.messages.deps_out_of_date).await?;
         }
+
+        log::info!("Sent notice to the Matrix room");
     }
 
     store_sync_token(cfg, &next_token).await?;
