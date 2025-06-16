@@ -31,10 +31,9 @@ impl Display for Error {
                 // would be displayed as just "error decoding response body",
                 // rather than anything indicating what's wrong with the
                 // response body.
-                match error.source() {
-                    Some(source) => write!(f, ": {source}")?,
-                    None => {}
-                };
+                if let Some(source) = error.source() {
+                    write!(f, ": {source}")?;
+                }
 
                 // If there's a URL attached to the error, then also include it
                 // so the logs can show what kind of request was being performed
