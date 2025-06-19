@@ -12,20 +12,14 @@ mod sync;
 /// The `msgtype` property of an `m.room.message` Matrix event content.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 enum MessageType {
-    #[serde(rename = "m.text")]
-    Text,
     #[serde(rename = "m.notice")]
     Notice,
-    #[serde(rename = "m.key.verification.request")]
-    KeyVerificationRequest,
-    #[serde(rename = "m.image")]
-    Image,
-    #[serde(rename = "m.file")]
-    File,
-    #[serde(rename = "m.audio")]
-    Audio,
-    #[serde(rename = "m.video")]
-    Video,
+
+    // We only care about notices (because that's what we read and send). We
+    // lump everything else in a catch-all variant so serde doesn't complain
+    // about not being able to find one that fits.
+    #[serde(other)]
+    Unsupported,
 }
 
 /// The content of an `m.room.message` Matrix event.
