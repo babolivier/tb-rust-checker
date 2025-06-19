@@ -47,6 +47,7 @@ async fn do_sync(cfg: &Config, client: Client, url: Url) -> Result<String, Error
         .bearer_auth(&cfg.matrix.access_token)
         .send()
         .await?
+        .error_for_status()?
         .json()
         .await?;
 

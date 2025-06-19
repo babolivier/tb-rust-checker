@@ -1,6 +1,6 @@
 [package]
 name = "tb-rust-checker"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["Brendan Abolivier"]
 description = "A Matrix bot to check if the Rust dependencies of comm-central need to be revendored after a push to mozilla-central"
 readme = "README.md"
