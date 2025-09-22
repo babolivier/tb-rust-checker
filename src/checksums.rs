@@ -7,6 +7,7 @@ use sha2::{Digest, Sha512};
 
 use crate::error::Error;
 
+/// The content of the `checksums.json` file on comm-central.
 #[derive(Debug, Clone, Deserialize)]
 struct CommCentralChecksums {
     mc_workspace_toml: String,
