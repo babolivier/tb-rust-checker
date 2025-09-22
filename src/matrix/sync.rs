@@ -41,7 +41,9 @@ const SYNC_TIMEOUT: usize = 30000;
 /// This happens only once per sync, even if it includes multiple push messages
 /// (since we always compare with repository tips).
 async fn do_sync(cfg: &Config, client: Client, url: Url) -> Result<String, Error> {
-    // Send a new sync request and parse the sync response.
+    // Send a new sync request and parse the sync response. Sync responses
+    // should only feature 2XX codes, so propagate an error if we get anything
+    // else.
     let response: SyncResponse = client
         .get(url)
         .bearer_auth(&cfg.matrix.access_token)
@@ -91,7 +93,7 @@ async fn do_sync(cfg: &Config, client: Client, url: Url) -> Result<String, Error
     if !pushes.is_empty() {
         log::info!("Processing new push");
 
-        if verify_checksums_match().await? {
+        if verify_checksums_match(Default::default()).await? {
             log::debug!("Checksums match");
             send_notice(&cfg.matrix, client.clone(), &cfg.messages.deps_up_to_date).await?;
         } else {
