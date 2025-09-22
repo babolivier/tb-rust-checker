@@ -7,8 +7,9 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use reqwest::Client;
 use url::Url;
 
+use checker_base::error::Error;
+
 use crate::config::MatrixConfig;
-use crate::error::Error;
 use crate::matrix::{MessageEventContent, MessageType};
 
 /// Send an `m.room.message` event to the target room specified in the

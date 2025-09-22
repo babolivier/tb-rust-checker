@@ -9,9 +9,7 @@ use clap::Parser;
 use crate::config::load_config_from_file;
 use crate::storage::read_sync_token_from_store;
 
-mod checksums;
 mod config;
-mod error;
 mod matrix;
 mod storage;
 

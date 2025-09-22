@@ -9,9 +9,10 @@ use reqwest::Client;
 use tokio::time;
 use url::Url;
 
-use crate::checksums::verify_checksums_match;
+use checker_base::checksums::verify_checksums_match;
+use checker_base::error::Error;
+
 use crate::config::Config;
-use crate::error::Error;
 use crate::matrix::send::send_notice;
 use crate::storage::store_sync_token;
 

@@ -37,7 +37,7 @@ const MC_CARGO_LOCK_PATH: &str = "Cargo.lock";
 /// The revisions to use when querying files on hg.mozilla.org. Both fields
 /// default to "tip" if not provided.
 #[derive(Default)]
-pub(crate) struct ChangeSet {
+pub struct ChangeSet {
     /// The revision for mozilla-central.
     pub mc_rev: Option<String>,
 
@@ -51,7 +51,7 @@ pub(crate) struct ChangeSet {
 ///
 /// This function returns whether the checksum of all files match the checksums
 /// stored in comm-central.
-pub(crate) async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error> {
+pub async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error> {
     // A helper macro that generates the URL to a raw file in the given repo on
     // the Mercurial web frontend.
     macro_rules! generate_url {

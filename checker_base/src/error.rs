@@ -10,7 +10,7 @@ use thiserror::Error;
 
 /// Errors that happen after the bot's initial setup.
 #[derive(Error, Debug)]
-pub(crate) enum Error {
+pub enum Error {
     Network(#[from] reqwest::Error),
     Io(#[from] io::Error),
     Json(#[from] serde_json::Error),

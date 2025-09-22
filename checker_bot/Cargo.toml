@@ -1,0 +1,21 @@
+[package]
+name = "checker_bot"
+version = "1.0.2"
+authors = ["Brendan Abolivier"]
+description = "A Matrix bot to check if the Rust dependencies of comm-central need to be revendored after a push to mozilla-central"
+repository = "https://github.com/babolivier/tb-rust-checker"
+license = "MPL-2.0"
+edition = "2024"
+
+[dependencies]
+checker_base = { path = "../checker_base" }
+anyhow = "1.0.98"
+clap = { version = "4.5.39", features = ["derive"] }
+env_logger = "0.11.8"
+log = "0.4.27"
+reqwest = { version = "0.12.19", features = ["json"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+tokio = { version = "1.45.1", features = ["fs", "macros", "rt", "time"] }
+toml = "0.8.22"
+url = "2.5.4"
