@@ -1,3 +1,3 @@
 [workspace]
 resolver = "3"
-members = ["checker_base", "checker_bot"]
+members = ["checker_base", "checker_bot", "checker_cli"]

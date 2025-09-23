@@ -6,6 +6,7 @@ description = "A Matrix bot to check if the Rust dependencies of comm-central ne
 repository = "https://github.com/babolivier/tb-rust-checker"
 license = "MPL-2.0"
 edition = "2024"
+default-run = "checker_bot"
 
 [dependencies]
 checker_base = { path = "../checker_base" }
