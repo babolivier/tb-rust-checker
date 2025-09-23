@@ -79,6 +79,49 @@ documentation for the
 [env_logger](https://docs.rs/env_logger/latest/env_logger/#enabling-logging)
 crate.
 
+## Command-line tool
+
+This workspace also includes a command-line tool to manually run the file
+verification logic. It can be run using Cargo:
+
+```bash
+cargo run --bin checker_cli
+```
+
+This tool can be used to compare files at given revisions of mozilla-unified and
+comm-unified:
+
+```
+Usage: checker_cli [OPTIONS]
+
+Options:
+  -m, --mozilla-rev <MOZILLA_REV>  The mozilla-unified revision to use. Defaults to "central"
+  -c, --comm-rev <COMM_REV>        The comm-unified revision to use. Defaults to "comm"
+  -h, --help                       Print help
+```
+
+For example, the following command compares the manifests between the commit
+`AAA` on mozilla-unified and `BBB` on comm-unified:
+
+```bash
+cargo run --bin checker_cli -- -m AAA -c BBB
+```
+
+As mentioned in the help text above, each argument defaults to the latest
+revision in the relevant -central repository (i.e. the `central` bookmark on
+mozilla-unified and the `comm` bookmark on comm-unified). For example, the
+following command compares the manifests between the latest commit of
+comm-central and the commit `AAA` on mozilla-unified:
+
+```bash
+cargo run --bin checker_cli -- -m AAA
+# Does the same thing as:
+cargo run --bin checker_cli -- -m AAA -c comm
+```
+
+The `RUST_LOG` environment variable can be used to control logging, in the same
+way as with the main bot binary.
+
 ## Misc
 
 ### Does the bot also provide patches for comm-central?
