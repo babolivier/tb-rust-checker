@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+use std::env;
 use std::io::ErrorKind;
 
 use clap::Parser;
@@ -24,6 +25,12 @@ async fn main() {
     let args = Args::parse();
 
     env_logger::init();
+
+    // Hack to set the default log level to "info".
+    if env::var("RUST_LOG").is_err() {
+        // SAFETY: We're always running this program in a single-thread context.
+        unsafe { env::set_var("RUST_LOG", "info") }
+    }
 
     let cfg = match load_config_from_file(args.config_file) {
         Ok(cfg) => cfg,
