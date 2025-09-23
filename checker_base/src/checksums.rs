@@ -101,22 +101,12 @@ pub async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error
         ),
     ];
 
-    let mismatch = futures::future::join_all(futs)
+    let checksum_results = futures::future::join_all(futs)
         .await
         .into_iter()
-        .filter_map(|result| match result {
-            // Record any mismatch in the checksums.
-            Ok(checksum_matches) if !checksum_matches => Some(checksum_matches),
-            Ok(_) => None,
-            Err(err) => {
-                log::error!("Error querying files to compare: {err}");
-                None
-            }
-        })
-        .next()
-        .is_some();
+        .collect::<Result<Vec<bool>, Error>>()?;
 
-    Ok(!mismatch)
+    Ok(!checksum_results.contains(&false))
 }
 
 /// Download the file at the given URL, then compare its SHA512 checksum to the
