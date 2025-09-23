@@ -48,9 +48,9 @@ mozilla-central files it checks are:
 The bot listens to new messages in a specific Matrix room. When it sees a
 message that indicates a new push to mozilla-central (also sent by the CI/CD
 infrastructure), it downloads the contents of both the checksums file in
-comm-central, and the four mozilla-central files, using the web Mercurial
+comm-unified, and the four mozilla-unified files, using the web Mercurial
 interface at <https://hg.mozilla.org/>. It then compares the checksums from the
-mozilla-central files with the ones stored in comm-central, and sends an
+mozilla-unified files with the ones stored in comm-unified, and sends an
 appropriate notice to the Matrix room.
 
 ## How to use

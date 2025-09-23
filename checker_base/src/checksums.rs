@@ -18,11 +18,11 @@ struct CommCentralChecksums {
 
 /// The repository on hg.mozilla.org to fetch a given file from.
 enum Repo {
-    /// The mozilla-central repository.
-    MozillaCentral,
+    /// The Firefox (mozilla-unified) repository.
+    Firefox,
 
-    /// The comm-central repository.
-    CommCentral,
+    /// The Thunderbird (comm-unified) repository.
+    Thunderbird,
 }
 
 /// The file on comm-central containing the checksums to compare.
@@ -34,15 +34,14 @@ const MC_GKRUST_TOML_PATH: &str = "toolkit/library/rust/shared/Cargo.toml";
 const MC_HACK_TOML_PATH: &str = "build/workspace-hack/Cargo.toml";
 const MC_CARGO_LOCK_PATH: &str = "Cargo.lock";
 
-/// The revisions to use when querying files on hg.mozilla.org. Both fields
-/// default to "tip" if not provided.
+/// The revisions to use when querying files on hg.mozilla.org.
 #[derive(Default)]
 pub struct ChangeSet {
-    /// The revision for mozilla-central.
-    pub mc_rev: Option<String>,
+    /// The revision for mozilla-unified. Defaults to "central".
+    pub moz_rev: Option<String>,
 
-    /// The revision for comm-central.
-    pub cc_rev: Option<String>,
+    /// The revision for comm-unified. Defaults to "comm".
+    pub tb_rev: Option<String>,
 }
 
 /// Download the comm-central file containing the SHA512 checksums to compare,
@@ -57,16 +56,24 @@ pub async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error
     macro_rules! generate_url {
         ($repo:expr, $path:tt) => {{
             let (repo_name, rev) = match $repo {
-                Repo::MozillaCentral => ("mozilla-central", &change_set.mc_rev),
-                Repo::CommCentral => ("comm-central", &change_set.cc_rev),
+                Repo::Firefox => (
+                    "mozilla-unified",
+                    change_set.moz_rev.clone().unwrap_or("central".to_string()),
+                ),
+                Repo::Thunderbird => (
+                    "comm-unified",
+                    change_set.tb_rev.clone().unwrap_or("comm".to_string()),
+                ),
             };
 
-            format!(
+            let url = format!(
                 "https://hg-edge.mozilla.org/{}/raw-file/{}/{}",
-                repo_name,
-                rev.as_ref().unwrap_or(&"tip".to_string()),
-                $path
-            )
+                repo_name, &rev, $path
+            );
+
+            log::debug!("Fetching file: {}", url);
+
+            url
         }};
     }
 
@@ -74,7 +81,7 @@ pub async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error
     // statically-served file should only result in 200 responses, so propagate
     // an error if we get an HTTP error.
     let checksums: CommCentralChecksums =
-        reqwest::get(generate_url!(Repo::CommCentral, CC_CHECKSUMS_PATH))
+        reqwest::get(generate_url!(Repo::Thunderbird, CC_CHECKSUMS_PATH))
             .await?
             .error_for_status()?
             .json()
@@ -84,19 +91,19 @@ pub async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error
     // we expect.
     let futs = vec![
         compare_checksum_for_file(
-            generate_url!(Repo::MozillaCentral, MC_WORKSPACE_TOML_PATH),
+            generate_url!(Repo::Firefox, MC_WORKSPACE_TOML_PATH),
             &checksums.mc_workspace_toml,
         ),
         compare_checksum_for_file(
-            generate_url!(Repo::MozillaCentral, MC_GKRUST_TOML_PATH),
+            generate_url!(Repo::Firefox, MC_GKRUST_TOML_PATH),
             &checksums.mc_gkrust_toml,
         ),
         compare_checksum_for_file(
-            generate_url!(Repo::MozillaCentral, MC_HACK_TOML_PATH),
+            generate_url!(Repo::Firefox, MC_HACK_TOML_PATH),
             &checksums.mc_hack_toml,
         ),
         compare_checksum_for_file(
-            generate_url!(Repo::MozillaCentral, MC_CARGO_LOCK_PATH),
+            generate_url!(Repo::Firefox, MC_CARGO_LOCK_PATH),
             &checksums.mc_cargo_lock,
         ),
     ];
