@@ -96,11 +96,11 @@ async fn do_sync(cfg: &Config, client: Client, url: Url) -> Result<String, Error
 
         let notice_text = match verify_checksums_match(Default::default()).await {
             Ok(checksums_match) if checksums_match => {
-                log::debug!("Checksums match");
+                log::info!("Checksums match");
                 &cfg.messages.deps_up_to_date
             }
             Ok(_) => {
-                log::debug!("Checksums do not match");
+                log::info!("Checksums do not match");
                 &cfg.messages.deps_out_of_date
             }
             Err(err) => {
