@@ -2,11 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-use std::env;
-
 use clap::Parser;
 
 use checker_base::checksums::{ChangeSet, verify_checksums_match};
+use env_logger::Env;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -32,13 +31,8 @@ impl From<Args> for ChangeSet {
 async fn main() {
     let args = Args::parse();
 
-    env_logger::init();
-
-    // Hack to set the default log level to "info".
-    if env::var("RUST_LOG").is_err() {
-        // SAFETY: We're always running this program in a single-thread context.
-        unsafe { env::set_var("RUST_LOG", "info") }
-    }
+    let env = Env::default().default_filter_or("info");
+    env_logger::init_from_env(env);
 
     match verify_checksums_match(args.into()).await {
         Ok(ok) => log::info!("checksums match: {ok}"),
