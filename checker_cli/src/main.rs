@@ -31,6 +31,7 @@ impl From<Args> for ChangeSet {
 async fn main() {
     let args = Args::parse();
 
+    // Default the log level to "info".
     let env = Env::default().default_filter_or("info");
     env_logger::init_from_env(env);
 
