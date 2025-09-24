@@ -15,6 +15,11 @@ deps_out_of_date = "The Rust dependencies need to be revendored! Look out for a 
 # up-to-date with mozilla-central.
 deps_up_to_date = "No revendor of the Rust dependencies needed"
 
+# Message to send if an error occurred in the process of fetching files and
+# comparing checksums. In this case, the error's details are logged to the
+# standard error output.
+error_while_comparing_checksums = "An error occurred while checking if the Rust dependencies need revendored. Please perform the verification manually with \"mach tb-rust check-upstream\", or wait for the Taskcluster automation to finish."
+
 [matrix]
 # The domain on which the Matrix server is accessed. The server must be
 # accessible on this domain using HTTPS with a valid certificate. If a port

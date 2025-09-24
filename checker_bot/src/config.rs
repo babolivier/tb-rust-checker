@@ -22,6 +22,7 @@ pub(crate) struct Config {
 pub(crate) struct MessagesConfig {
     pub deps_out_of_date: String,
     pub deps_up_to_date: String,
+    pub error_while_comparing_checksums: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]

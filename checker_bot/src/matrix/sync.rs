@@ -94,13 +94,22 @@ async fn do_sync(cfg: &Config, client: Client, url: Url) -> Result<String, Error
     if !pushes.is_empty() {
         log::info!("Processing new push");
 
-        if verify_checksums_match(Default::default()).await? {
-            log::debug!("Checksums match");
-            send_notice(&cfg.matrix, client.clone(), &cfg.messages.deps_up_to_date).await?;
-        } else {
-            log::debug!("Checksums do not match");
-            send_notice(&cfg.matrix, client.clone(), &cfg.messages.deps_out_of_date).await?;
-        }
+        let notice_text = match verify_checksums_match(Default::default()).await {
+            Ok(checksums_match) if checksums_match => {
+                log::debug!("Checksums match");
+                &cfg.messages.deps_up_to_date
+            }
+            Ok(_) => {
+                log::debug!("Checksums do not match");
+                &cfg.messages.deps_out_of_date
+            }
+            Err(err) => {
+                log::error!("Error while comparing checksums: {err}");
+                &cfg.messages.error_while_comparing_checksums
+            }
+        };
+
+        send_notice(&cfg.matrix, client.clone(), &notice_text).await?;
 
         log::info!("Sent notice to the Matrix room");
     }
