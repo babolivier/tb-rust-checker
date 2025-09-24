@@ -48,9 +48,9 @@ mozilla-central files it checks are:
 The bot listens to new messages in a specific Matrix room. When it sees a
 message that indicates a new push to mozilla-central (also sent by the CI/CD
 infrastructure), it downloads the contents of both the checksums file in
-comm-unified, and the four mozilla-unified files, using the web Mercurial
+comm-central, and the four mozilla-central files, using the web Mercurial
 interface at <https://hg.mozilla.org/>. It then compares the checksums from the
-mozilla-unified files with the ones stored in comm-unified, and sends an
+mozilla-central files with the ones stored in comm-central, and sends an
 appropriate notice to the Matrix room.
 
 ## How to use
@@ -88,20 +88,20 @@ verification logic. It can be run using Cargo:
 cargo run --bin checker_cli
 ```
 
-This tool can be used to compare files at given revisions of mozilla-unified and
-comm-unified:
+This tool can be used to compare files at given revisions of mozilla-central and
+comm-central:
 
 ```
 Usage: checker_cli [OPTIONS]
 
 Options:
-  -m, --mozilla-rev <MOZILLA_REV>  The mozilla-unified revision to use. Defaults to "central"
-  -c, --comm-rev <COMM_REV>        The comm-unified revision to use. Defaults to "comm"
+  -m, --mozilla-rev <MOZILLA_REV>  The mozilla-central revision to use. Defaults to "central"
+  -c, --comm-rev <COMM_REV>        The comm-central revision to use. Defaults to "comm"
   -h, --help                       Print help
 ```
 
 For example, the following command compares the manifests between the commit
-`AAA` on mozilla-unified and `BBB` on comm-unified:
+`AAA` on mozilla-central and `BBB` on comm-central:
 
 ```bash
 cargo run --bin checker_cli -- -m AAA -c BBB
@@ -109,9 +109,9 @@ cargo run --bin checker_cli -- -m AAA -c BBB
 
 As mentioned in the help text above, each argument defaults to the latest
 revision in the relevant -central repository (i.e. the `central` bookmark on
-mozilla-unified and the `comm` bookmark on comm-unified). For example, the
+mozilla-central and the `comm` bookmark on comm-central). For example, the
 following command compares the manifests between the latest commit of
-comm-central and the commit `AAA` on mozilla-unified:
+comm-central and the commit `AAA` on mozilla-central:
 
 ```bash
 cargo run --bin checker_cli -- -m AAA

@@ -10,11 +10,11 @@ use checker_base::checksums::{ChangeSet, verify_checksums_match};
 
 #[derive(Parser, Debug)]
 struct Args {
-    /// The mozilla-unified revision to use. Defaults to "central".
+    /// The mozilla-central revision to use. Defaults to "tip".
     #[arg(short, long)]
     mozilla_rev: Option<String>,
 
-    /// The comm-unified revision to use. Defaults to "comm".
+    /// The comm-central revision to use. Defaults to "tip".
     #[arg(short, long)]
     comm_rev: Option<String>,
 }

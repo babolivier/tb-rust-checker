@@ -37,10 +37,10 @@ const MC_CARGO_LOCK_PATH: &str = "Cargo.lock";
 /// The revisions to use when querying files on hg.mozilla.org.
 #[derive(Default)]
 pub struct ChangeSet {
-    /// The revision for mozilla-unified. Defaults to "central".
+    /// The revision for mozilla-central. Defaults to "tip".
     pub moz_rev: Option<String>,
 
-    /// The revision for comm-unified. Defaults to "comm".
+    /// The revision for comm-central. Defaults to "tip".
     pub tb_rev: Option<String>,
 }
 
@@ -56,19 +56,15 @@ pub async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error
     macro_rules! generate_url {
         ($repo:expr, $path:tt) => {{
             let (repo_name, rev) = match $repo {
-                Repo::Firefox => (
-                    "mozilla-unified",
-                    change_set.moz_rev.clone().unwrap_or("central".to_string()),
-                ),
-                Repo::Thunderbird => (
-                    "comm-unified",
-                    change_set.tb_rev.clone().unwrap_or("comm".to_string()),
-                ),
+                Repo::Firefox => ("mozilla-central", change_set.moz_rev.clone()),
+                Repo::Thunderbird => ("comm-central", change_set.tb_rev.clone()),
             };
 
             let url = format!(
                 "https://hg-edge.mozilla.org/{}/raw-file/{}/{}",
-                repo_name, &rev, $path
+                repo_name,
+                rev.unwrap_or("tip".to_string()),
+                $path
             );
 
             log::debug!("Fetching file: {}", url);
