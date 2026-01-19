@@ -56,15 +56,31 @@ pub async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error
     macro_rules! generate_url {
         ($repo:expr, $path:tt) => {{
             let (repo_name, rev) = match $repo {
-                Repo::Firefox => ("mozilla-central", change_set.moz_rev.clone()),
-                Repo::Thunderbird => ("comm-central", change_set.tb_rev.clone()),
+                Repo::Firefox => {
+                    let repo_name = "mozilla-central";
+
+                    // Although "tip" is the idiomatic reference for the latest
+                    // commit on a Mercurial repository, mozilla-central also
+                    // has a "default" reference which reference the last
+                    // non-tag push. This matters because, when new tags are
+                    // pushed to mozilla-central, the Mercurial web frontend
+                    // behaves in a way such that no file can be accessed using
+                    // "tip" until new code changes are pushed (but "default"
+                    // still works).
+                    let rev = change_set.moz_rev.clone().unwrap_or("default".to_string());
+
+                    (repo_name, rev)
+                }
+                Repo::Thunderbird => {
+                    let repo_name = "comm-central";
+                    let rev = change_set.tb_rev.clone().unwrap_or("tip".to_string());
+                    (repo_name, rev)
+                }
             };
 
             let url = format!(
                 "https://hg-edge.mozilla.org/{}/raw-file/{}/{}",
-                repo_name,
-                rev.unwrap_or("tip".to_string()),
-                $path
+                repo_name, rev, $path
             );
 
             log::debug!("Fetching file: {}", url);
