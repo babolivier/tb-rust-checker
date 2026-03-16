@@ -11,7 +11,7 @@ use thiserror::Error;
 /// Errors that happen after the bot's initial setup.
 #[derive(Error, Debug)]
 pub enum Error {
-    Network(#[from] reqwest::Error),
+    Reqwest(#[from] reqwest::Error),
     Io(#[from] io::Error),
     Json(#[from] serde_json::Error),
     UrlParse(#[from] url::ParseError),
@@ -22,7 +22,7 @@ impl Display for Error {
     // because we need some extra processing to properly handle reqwest errors.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::Network(error) => {
+            Error::Reqwest(error) => {
                 write!(f, "network error: {error}")?;
 
                 // If the error has a source, then we want to include it as

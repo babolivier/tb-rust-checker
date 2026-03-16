@@ -5,7 +5,7 @@
 use std::cell::RefCell;
 use std::time::Duration;
 
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder};
 use tokio::time;
 use url::Url;
 
@@ -149,7 +149,7 @@ pub(crate) async fn sync(cfg: &Config, token: String) -> Result<(), Error> {
     let base_url = Url::parse(&base_url)?;
 
     // Loop indefinitely to listen for new messages in the room.
-    let client = Client::new();
+    let client = ClientBuilder::new().connection_verbose(true).build()?;
     let token = RefCell::new(token);
     loop {
         let mut url = base_url.clone();
