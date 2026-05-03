@@ -35,13 +35,6 @@ impl Display for Error {
                     write!(f, ": {source}")?;
                 }
 
-                // If there's a URL attached to the error, then also include it
-                // so the logs can show what kind of request was being performed
-                // when the error occurred.
-                if let Some(url) = error.url() {
-                    write!(f, " (URL: {})", url.as_str())?;
-                }
-
                 Ok(())
             }
             Error::Io(error) => write!(f, "I/O error: {error}"),
