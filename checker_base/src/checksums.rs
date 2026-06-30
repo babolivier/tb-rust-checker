@@ -51,35 +51,20 @@ pub struct ChangeSet {
 /// This function returns whether the checksum of all files match the checksums
 /// stored in comm-central.
 pub async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error> {
+    let ff_path = rev_to_path_segment(change_set.moz_rev);
+    let tb_path = rev_to_path_segment(change_set.tb_rev);
+
     // A helper macro that generates the URL to a raw file in the given repo on
     // the Mercurial web frontend.
     macro_rules! generate_url {
         ($repo:expr, $path:tt) => {{
             let (repo_name, rev) = match $repo {
-                Repo::Firefox => {
-                    let repo_name = "mozilla-central";
-
-                    // Although "tip" is the idiomatic reference for the latest
-                    // commit on a Mercurial repository, mozilla-central also
-                    // has a "default" reference which reference the last
-                    // non-tag push. This matters because, when new tags are
-                    // pushed to mozilla-central, the Mercurial web frontend
-                    // behaves in a way such that no file can be accessed using
-                    // "tip" until new code changes are pushed (but "default"
-                    // still works).
-                    let rev = change_set.moz_rev.clone().unwrap_or("default".to_string());
-
-                    (repo_name, rev)
-                }
-                Repo::Thunderbird => {
-                    let repo_name = "comm-central";
-                    let rev = change_set.tb_rev.clone().unwrap_or("tip".to_string());
-                    (repo_name, rev)
-                }
+                Repo::Firefox => ("mozilla-firefox/firefox", &ff_path),
+                Repo::Thunderbird => ("thunderbird/thunderbird-desktop", &tb_path),
             };
 
             let url = format!(
-                "https://hg-edge.mozilla.org/{}/raw-file/{}/{}",
+                "https://raw.githubusercontent.com/{}/{}/{}",
                 repo_name, rev, $path
             );
 
@@ -126,6 +111,15 @@ pub async fn verify_checksums_match(change_set: ChangeSet) -> Result<bool, Error
         .collect::<Result<Vec<bool>, Error>>()?;
 
     Ok(!checksum_results.contains(&false))
+}
+
+/// Unwraps the revision in the [`Option`] with the relevant default value, so
+/// it can be used to fetch a raw file from GitHub.
+///
+/// In this context, the default value refers to the main branch of the
+/// repository.
+fn rev_to_path_segment(rev: Option<String>) -> String {
+    rev.unwrap_or("refs/heads/main".to_string())
 }
 
 /// Download the file at the given URL, then compare its SHA512 checksum to the
