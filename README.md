@@ -147,19 +147,3 @@ at which the previous sync stopped.
 If this token is not persisted on disk, then the first sync after a restart will
 contain every message the bot has accessed to, rather than every message that
 was sent after it last sync'd.
-
-### Why doesn't the bot use the [Matrix Rust SDK](https://github.com/matrix-org/matrix-rust-sdk/)?
-
-I first attempted to build this tool using the Matrix Rust SDK, but encountered
-a few issues with it. There are a few limitations in the SDK itself that make it
-awkward to work with (e.g. converting a string to a `RoomId` isn't
-straightforward when the string isn't a string literal, it's not possible to
-access the latest sync token using the recommended way of performing syncs and
-so a restart always causes a full sync and forces the bot to react to process
-messages it's already seen, etc.); and the SDK makes projects more
-resource-intensive to build than I think they need to be (converting this bot to
-it and compiling it would take over 1GB of memory, even with incremental
-compilation).
-
-I'm open to integrating the Matrix Rust SDK in this project when these issues
-are resolved; in the meantime using plain old `serde` and `reqwest` feels nicer.
