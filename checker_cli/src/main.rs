@@ -9,20 +9,20 @@ use env_logger::Env;
 
 #[derive(Parser, Debug)]
 struct Args {
-    /// The mozilla-central revision to use. Defaults to "tip".
+    /// The Firefox revision to use. Defaults to "refs/heads/main".
     #[arg(short, long)]
-    mozilla_rev: Option<String>,
+    firefox_rev: Option<String>,
 
-    /// The comm-central revision to use. Defaults to "tip".
+    /// The Thunderbird revision to use. Defaults to "refs/heads/main".
     #[arg(short, long)]
-    comm_rev: Option<String>,
+    thunderbird_rev: Option<String>,
 }
 
 impl From<Args> for ChangeSet {
     fn from(value: Args) -> Self {
         ChangeSet {
-            moz_rev: value.mozilla_rev,
-            tb_rev: value.comm_rev,
+            moz_rev: value.firefox_rev,
+            tb_rev: value.thunderbird_rev,
         }
     }
 }

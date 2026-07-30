@@ -37,10 +37,10 @@ const MC_CARGO_LOCK_PATH: &str = "Cargo.lock";
 /// The revisions to use when querying files on hg.mozilla.org.
 #[derive(Default)]
 pub struct ChangeSet {
-    /// The revision for mozilla-central. Defaults to "tip".
+    /// The revision for Firefox. Defaults to "refs/heads/main".
     pub moz_rev: Option<String>,
 
-    /// The revision for comm-central. Defaults to "tip".
+    /// The revision for Thunderbird. Defaults to "refs/heads/main".
     pub tb_rev: Option<String>,
 }
 

@@ -2,25 +2,25 @@
 
 As of [bug 1860654](https://bugzilla.mozilla.org/show_bug.cgi?id=1860654), which
 adds the ability to build Thunderbird Desktop with Thunderbird-specific Rust
-code, the Rust dependencies vendored in
-[comm-central](https://hg.mozilla.org/comm-central) need to be kept in sync with
-the ones vendored in [mozilla-central](https://hg.mozilla.org/mozilla-central)
-(at least for dependencies shared by both repositories).
+code, the Rust dependencies vendored in [the Thunderbird
+repository](https://github.com/thunderbird/thunderbird-desktop) need to be kept
+in sync with the ones vendored in [the Firefox
+repository](https://github.com/mozilla-firefox/firefox/) (at least for
+dependencies shared by both repositories).
 
 In order to do this, two Thunderbird-specific
 [`mach`](https://firefox-source-docs.mozilla.org/mach/index.html) commands were
 introduced:
 
 - `mach tb-rust check-upstream`, which checks whether the common dependencies
-  between comm-central and mozilla-central are out of sync
-- `mach tb-rust vendor`, which updates the comm-central manifest to ensure
-  common dependencies are in sync, and revendor the Rust dependencies in
-  comm-central.
+  between Thunderbird and Firefox are out of sync
+- `mach tb-rust vendor`, which updates the Thunderbird manifest to ensure common
+  dependencies are in sync, and revendor the Rust dependencies in Thunderbird.
 
 The first command is performed automatically by the CI/CD infrastructure when a
-new push to mozilla-central happens. The check's result is shared with the
-Thunderbird sheriffs via a Matrix message; this same automation will then also
-create a patch to sync the common dependencies.
+new push to Firefox's `main` branch happens. The check's result is shared with
+the Thunderbird sheriffs via a Matrix message; this same automation will then
+also create a patch to sync the common dependencies.
 
 ## Problem
 
@@ -28,7 +28,7 @@ Due to the way this automation works, this Matrix message might be sent a long
 time after the push has happened, which might be uncomfortable to sheriffs as
 they might end up waiting quite a bit for it to arrive, only to be told there's
 nothing that needs to be done. This is because the automation needs to clone
-comm-central and mozilla-central before running this command, which is
+Thunderbird's and Firefox's repositories before running this command, which is
 time-consuming, and because the CI/CD job itself might need to wait several
 minutes for an available worker.
 
@@ -36,9 +36,9 @@ minutes for an available worker.
 
 This Matrix bot attempts to solve this issue by taking a different approach,
 which is to replicate what `mach tb-rust check-upstream` does. This command
-works by calculating SHA512 checksums of a few files in mozilla-central and
-comparing them to the values stored in a file in comm-central. The
-mozilla-central files it checks are:
+works by calculating SHA512 checksums of a few files in the Firefox repo and
+comparing them to the values stored in a file in the Thunderbird one. The
+Firefox files it checks are:
 
 - `Cargo.toml`
 - `Cargo.lock`
@@ -46,12 +46,11 @@ mozilla-central files it checks are:
 - `build/workspace-hack/Cargo.toml`
 
 The bot listens to new messages in a specific Matrix room. When it sees a
-message that indicates a new push to mozilla-central (also sent by the CI/CD
-infrastructure), it downloads the contents of both the checksums file in
-comm-central, and the four mozilla-central files, using the web Mercurial
-interface at <https://hg.mozilla.org/>. It then compares the checksums from the
-mozilla-central files with the ones stored in comm-central, and sends an
-appropriate notice to the Matrix room.
+message that indicates a new push to Firefox's main branch (also sent by the
+CI/CD infrastructure), it downloads the contents of both the checksums file in
+Thunderbird's repo, and the four Firefox files, from GitHub. It then compares
+the checksums from the Firefox files with the ones stored in Thunderbird's repo,
+and sends an appropriate notice to the Matrix room.
 
 ## How to use
 
@@ -88,35 +87,35 @@ verification logic. It can be run using Cargo:
 cargo run --bin checker_cli
 ```
 
-This tool can be used to compare files at given revisions of mozilla-central and
-comm-central:
+This tool can be used to compare files at given revisions of Firefox and
+Thunderbird:
 
 ```
 Usage: checker_cli [OPTIONS]
 
 Options:
-  -m, --mozilla-rev <MOZILLA_REV>  The mozilla-central revision to use. Defaults to "central"
-  -c, --comm-rev <COMM_REV>        The comm-central revision to use. Defaults to "comm"
-  -h, --help                       Print help
+  -f, --firefox-rev <FIREFOX_REV>
+          The Firefox revision to use. Defaults to "refs/heads/main"
+  -t, --thunderbird-rev <THUNDERBIRD_REV>
+          The Thunderbird revision to use. Defaults to "refs/heads/main"
+  -h, --help
+          Print help
 ```
 
 For example, the following command compares the manifests between the commit
-`AAA` on mozilla-central and `BBB` on comm-central:
+`AAA` on Firefox and `BBB` on Thunderbird:
 
 ```bash
-cargo run --bin checker_cli -- -m AAA -c BBB
+cargo run --bin checker_cli -- -f AAA -t BBB
 ```
 
 As mentioned in the help text above, each argument defaults to the latest
-revision in the relevant -central repository (i.e. the `central` bookmark on
-mozilla-central and the `comm` bookmark on comm-central). For example, the
-following command compares the manifests between the latest commit of
-comm-central and the commit `AAA` on mozilla-central:
+revision in the relevant repository's main branch. For example, the following
+command compares the manifests between the latest commit of Thunderbird and the
+commit `AAA` on Firefox:
 
 ```bash
-cargo run --bin checker_cli -- -m AAA
-# Does the same thing as:
-cargo run --bin checker_cli -- -m AAA -c comm
+cargo run --bin checker_cli -- -f AAA
 ```
 
 The `RUST_LOG` environment variable can be used to control logging, in the same
@@ -124,11 +123,11 @@ way as with the main bot binary.
 
 ## Misc
 
-### Does the bot also provide patches for comm-central?
+### Does the bot also provide patches for Thunderbird?
 
-No. Building the patch to bring the vendored comm-central Rust dependencies
-up-to-date with mozilla-central still requires cloning both comm-central and
-mozilla-central, so it's best to leave it to the automation.
+No. Building the patch to bring the vendored Thunderbird Rust dependencies
+up-to-date with Firefox still requires cloning both Thunderbird's and Firefox's
+repositories, so it's best to leave it to the automation.
 
 In theory, this bot _could_ make this step a bit quicker by using persistent
 clones of both repositories, that it would simply update on every push to run
